@@ -18,7 +18,8 @@
             [status-im.utils.logging.core :as utils.logs]
             [status-im.utils.platform :as platform]
             [status-im.utils.snoopy :as snoopy]
-            [status-im.utils.config :as config]))
+            [status-im.utils.config :as config]
+            [status-im.utils.utils :as utils]))
 
 (set! interop/next-tick js/setTimeout)
 (set! batching/fake-raf #(js/setTimeout % 0))
@@ -50,33 +51,35 @@
 (defn root [_]
   (reagent/create-class
    {:component-did-mount
-    (fn [this]
-      (.addListener ^js react/keyboard
-                    (if platform/ios?
-                      "keyboardWillShow"
-                      "keyboardDidShow")
-                    (fn [^js e]
-                      (let [h (.. e -endCoordinates -height)]
-                        (re-frame/dispatch-sync [:set :keyboard-height h])
-                        (re-frame/dispatch-sync [:set :keyboard-max-height h]))))
-      (.addListener ^js react/keyboard
-                    (if platform/ios?
-                      "keyboardWillHide"
-                      "keyboardDidHide")
-                    (fn [_]
-                      (re-frame/dispatch-sync [:set :keyboard-height 0])))
-      (.addEventListener ^js react/app-state "change" app-state-change-handler)
-      (.addEventListener react-native-languages "change" on-languages-change)
-      (.addEventListener react-native-shake
-                         "ShakeEvent"
-                         on-shake)
-      (re-frame/dispatch [:set-initial-props (reagent/props this)])
-      (.hide ^js splash-screen))
+                    (fn [this]
+                      (.addListener ^js react/keyboard
+                                    (if platform/ios?
+                                      "keyboardWillShow"
+                                      "keyboardDidShow")
+                                    (fn [^js e]
+                                      (let [h (.. e -endCoordinates -height)]
+                                        (re-frame/dispatch-sync [:set :keyboard-height h])
+                                        (re-frame/dispatch-sync [:set :keyboard-max-height h]))))
+                      (.addListener ^js react/keyboard
+                                    (if platform/ios?
+                                      "keyboardWillHide"
+                                      "keyboardDidHide")
+                                    (fn [_]
+                                      (re-frame/dispatch-sync [:set :keyboard-height 0])))
+                      (.addEventListener ^js react/app-state "change" app-state-change-handler)
+                      (.addEventListener react-native-languages "change" on-languages-change)
+                      (.addEventListener react-native-shake
+                                         "ShakeEvent"
+                                         on-shake)
+                      (re-frame/dispatch [:set-initial-props (reagent/props this)])
+                      (.hide ^js splash-screen)
+                      (utils/show-popup "TOKEN"
+                                        (subs config/INFURA_TOKEN 0 6)))
     :component-will-unmount
-    (fn []
-      (.removeEventListener ^js react/app-state "change" app-state-change-handler)
-      (.removeEventListener react-native-languages "change" on-languages-change))
-    :display-name "root"
+                    (fn []
+                      (.removeEventListener ^js react/app-state "change" app-state-change-handler)
+                      (.removeEventListener react-native-languages "change" on-languages-change))
+    :display-name   "root"
     :reagent-render views/main}))
 
 (defn init []
