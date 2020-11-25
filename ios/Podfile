@@ -23,10 +23,10 @@ abstract_target 'Status' do
       # Pods for testing
     end
   end
-  
+
   target 'StatusImPR' do
   end
-  
+
   use_flipper!
   post_install do |installer|
     flipper_post_install(installer)
@@ -35,3 +35,4 @@ abstract_target 'Status' do
 
   use_native_modules!
 end
+
