@@ -52,7 +52,6 @@
       ;; Show manage storage link when on login screen, only on android devices
       ;; and the selected account is not paired with keycard
       (when (and (= view-id :login)
-                 platform/android?
                  (not acc-to-login-keycard-pairing))
         [quo/list-item
          {:theme               :accent
@@ -67,8 +66,7 @@
         :accessibility-label :enter-seed-phrase-button
         :icon                :main-icons/text
         :on-press            #(hide-sheet-and-dispatch [::multiaccounts.recover/enter-phrase-pressed])}]
-      (when (or platform/android?
-                config/keycard-test-menu-enabled?)
+      (when config/keycard-test-menu-enabled?
         [quo/list-item
          {:theme               :accent
           :title               (i18n/label :t/recover-with-keycard)
