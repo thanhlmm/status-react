@@ -542,3 +542,25 @@
       :keycard
       :from-key-storage-and-migration?
       boolean))
+
+(fx/defn start-nfc
+  {:events [:keycard.ui/start-nfc]}
+  [cofx]
+  {:keycard/start-nfc nil})
+
+(fx/defn stop-nfc
+  {:events [:keycard.ui/stop-nfc]}
+  [cofx]
+  {:keycard/stop-nfc nil})
+
+(fx/defn start-nfc-success
+  {:events [:keycard.callback/start-nfc-success]}
+  [{:keys [db]} _]
+  (log/debug "[keycard] nfc started")
+  {:db (assoc-in db [:keycard :nfc-running?] true)})
+
+(fx/defn stop-nfc-success
+  {:events [:keycard.callback/stop-nfc-success]}
+  [{:keys [db]} _]
+  (log/debug "[keycard] nfc stopped")
+  {:db (assoc-in db [:keycard :nfc-running?] false)})
