@@ -551,7 +551,8 @@
 (fx/defn stop-nfc
   {:events [:keycard.ui/stop-nfc]}
   [cofx]
-  {:keycard/stop-nfc nil})
+  {:keycard/stop-nfc nil
+   :keycard.callback/on-card-disconnected nil})
 
 (fx/defn start-nfc-success
   {:events [:keycard.callback/start-nfc-success]}
@@ -569,7 +570,10 @@
   {:events [:keycard.callback/stop-nfc-success]}
   [{:keys [db]} _]
   (log/info "[keycard] nfc stopped success")
-  {:db (assoc-in db [:keycard :nfc-running?] false)})
+  (log/info "[keycard] setting card-connected? and nfc-running? to false")
+  {:db (-> db
+           (assoc-in [:keycard :nfc-running?] false)
+           (assoc-in [:keycard :card-connected?] false))})
 
 (fx/defn stop-nfc-failure
   {:events [:keycard.callback/stop-nfc-failure]}
