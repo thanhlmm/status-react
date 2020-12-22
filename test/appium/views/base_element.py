@@ -15,6 +15,47 @@ from selenium.webdriver.support import expected_conditions
 from tests import transl
 
 
+class Locator(object):
+
+    def __init__(self, by, value):
+        self.by = by
+        self.value = value
+
+    @classmethod
+    def xpath_selector(locator, value):
+        return locator(MobileBy.XPATH, value)
+
+    @classmethod
+    def accessibility_id(locator, value):
+        return locator(MobileBy.ACCESSIBILITY_ID, value)
+
+    @classmethod
+    def text_selector(locator, text):
+        return locator.xpath_selector('//*[@text="' + text + '"]')
+
+    @classmethod
+    def text_part_selector(locator, text):
+        return BaseElement.Locator.xpath_selector('//*[contains(@text, "' + text + '")]')
+
+    @classmethod
+    def id(locator, value):
+        return locator(MobileBy.ID, value)
+
+    @classmethod
+    def webview_selector(cls, value):
+        xpath_expression = '//*[@text="{0}"] | //*[@content-desc="{desc}"]'.format(value, desc=value)
+        return cls(MobileBy.XPATH, xpath_expression)
+
+    @classmethod
+    def translation_id(cls, id, suffix='', uppercase=False):
+        text = transl[id]
+        if uppercase:
+            text = transl[id].upper()
+        return BaseElement.Locator.xpath_selector('//*[@text="' + text + '"]' + suffix)
+
+    def __str__(self, *args, **kwargs):
+        return "%s:%s" % (self.by, self.value)
+
 class BaseElement(object):
     class Locator(object):
 
@@ -57,9 +98,11 @@ class BaseElement(object):
         def __str__(self, *args, **kwargs):
             return "%s:%s" % (self.by, self.value)
 
-    def __init__(self, driver):
+    def __init__(self, driver, by = 'xpath', value=''):
         self.driver = driver
-        self.locator = None
+        self.by = by
+        self.value = value
+        self.locator = Locator(self.by,self.value).xpath_selector(self.value)
 
     @property
     def name(self):
@@ -293,8 +336,14 @@ class BaseText(BaseElement):
 
 class BaseButton(BaseElement):
 
-    def __init__(self, driver):
+    def __init__(self, driver, by = 'xpath', value=''):
         super(BaseButton, self).__init__(driver)
+        self.by = by
+        self.value = value
+
+
+
+        #self.locator = self.Locator.xpath_selector("//*[@text='Okay, got it']")
 
     def click(self):
         self.find_element().click()
