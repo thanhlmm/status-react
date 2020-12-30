@@ -93,6 +93,14 @@
 (defn network->chain-keyword [network]
   (chain-id->chain-keyword (network->chain-id network)))
 
+(defn current-network [db]
+  (let [networks   (get db :networks/networks)
+        network-id (get db :networks/current-network)]
+    (get networks network-id)))
+
+(defn custom-rpc-node? [{:keys [id]}]
+  (= 45 (count id)))
+
 (defn network->network-name [network]
   (chain-id->chain-name (network->chain-id network)))
 

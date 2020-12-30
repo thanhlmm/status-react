@@ -1373,5 +1373,7 @@
     "connect-wallet": "Connect wallet",
     "open-chat": "Open chat",
     "favourite-description": "Your favourite websites will appear here",
-    "transfers-fetching-failure": "Transfers history could not be updated. Check your connection and pull down to try again"
+    "transfers-fetching-failure": "Transfers history could not be updated. Check your connection and pull down to try again",
+    "non-archival-node": "RPC endpoint doesn't support archival requests. Your local transfers history might be incomplete.",
+    "custom-node": "You are using custom RPC endpoint. Your local transfers history might be incomplete."
 }
