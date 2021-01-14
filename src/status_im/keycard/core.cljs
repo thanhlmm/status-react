@@ -155,19 +155,20 @@
   {:events [:keycard.callback/on-unblock-pin-error]}
   [{:keys [db] :as cofx} error]
   (let [pairing       (common/get-pairing db)
-        tag-was-lost? (common/tag-lost? (:error error))]
+        tag-was-lost? (common/tag-lost? (:error error))
+        puk-retries (common/pin-retries (:error error))]
     (log/debug "[keycard] unblock pin error" error)
     (when-not tag-was-lost?
       (fx/merge cofx
-                {:keycard/get-application-info
-                 {:pairing pairing}
+                {:db
+                 (-> db
+                     (assoc-in [:keycard :application-info :puk-retry-counter] puk-retries)
+                     (update-in [:keycard :pin] merge
+                                {:status      (if (zero? puk-retries) :blocked-card :error)
+                                 :error-label :t/puk-mismatch
+                                 :enter-step  :puk
+                                 :puk         []}))}
 
-                 :db
-                 (update-in db [:keycard :pin] merge
-                            {:status      :error
-                             :error-label :t/puk-mismatch
-                             :enter-step  :puk
-                             :puk         []})}
                 (common/hide-connection-sheet)))))
 
 (fx/defn clear-on-verify-handlers
