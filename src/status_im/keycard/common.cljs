@@ -321,9 +321,7 @@
   (or
    (= code "android.nfc.TagLostException")
    (= error "Tag was lost.")
-   (= error "NFCError:100")
-   (not (nil? (re-matches #".*NFCError:100.*" error)))
-   (not (nil? (re-matches #".*Tag connection lost.*" error)))))
+   (= error "NFCError:100")))
 
 (fx/defn process-error [{:keys [db]} code error]
   (when-not (tag-lost-exception? code error)
