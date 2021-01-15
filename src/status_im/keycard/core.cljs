@@ -529,6 +529,18 @@
   (log/info "[keycard] card disconnected")
   {:db (assoc-in db [:keycard :card-connected?] false)})
 
+(fx/defn on-nfc-user-cancelled
+  {:events [:keycard.callback/on-nfc-user-cancelled]}
+  [{:keys [db]} _]
+  (log/info "[keycard] nfc user cancelled")
+  {:dispatch [:signing.ui/cancel-is-pressed]})
+
+(fx/defn on-nfc-timeout
+  {:events [:keycard.callback/on-nfc-timeout]}
+  [{:keys [db]} _]
+  (log/info "[keycard] nfc timeout")
+  {:dispatch [:signing.ui/cancel-is-pressed]})
+
 (fx/defn on-register-card-events
   {:events [:keycard.callback/on-register-card-events]}
   [{:keys [db]} listeners]

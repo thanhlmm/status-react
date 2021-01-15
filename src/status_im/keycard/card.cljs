@@ -60,6 +60,12 @@
     :on-card-disconnected
     #(re-frame/dispatch [:keycard.callback/on-card-disconnected])
 
+    :on-nfc-user-cancelled
+    #(re-frame/dispatch [:keycard.callback/on-nfc-user-cancelled])
+
+    :on-nfc-timeout
+    #(re-frame/dispatch [:keycard.callback/on-nfc-timeout])
+
     :on-nfc-enabled
     #(re-frame/dispatch [:keycard.callback/check-nfc-enabled-success true])
 

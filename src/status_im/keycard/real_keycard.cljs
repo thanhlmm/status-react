@@ -49,7 +49,7 @@
   (.openNfcSettings status-keycard))
 
 (defn remove-event-listeners []
-  (doseq [event ["keyCardOnConnected" "keyCardOnDisconnected"]]
+  (doseq [event ["keyCardOnConnected" "keyCardOnDisconnected", "keyCardOnNFCUserCancelled", "keyCardOnNFCTimeout"]]
     (.removeAllListeners ^js event-emitter event)))
 
 (defn remove-event-listener
@@ -63,6 +63,14 @@
 (defn on-card-disconnected
   [callback]
   (.addListener ^js event-emitter "keyCardOnDisconnected" callback))
+
+(defn on-nfc-user-cancelled
+  [callback]
+  (.addListener ^js event-emitter "keyCardOnNFCUserCancelled" callback))
+
+(defn on-nfc-timeout
+  [callback]
+  (.addListener ^js event-emitter "keyCardOnNFCTimeout" callback))
 
 (defn on-nfc-enabled
   [callback]
@@ -79,6 +87,8 @@
   (reset! active-listeners
           [(on-card-connected (:on-card-connected args))
            (on-card-disconnected (:on-card-disconnected args))
+           (on-nfc-user-cancelled (:on-nfc-user-cancelled args))
+           (on-nfc-timeout (:on-nfc-timeout args))
            (on-nfc-enabled (:on-nfc-enabled args))
            (on-nfc-disabled (:on-nfc-disabled args))]))
 
