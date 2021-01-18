@@ -14,7 +14,8 @@
             [quo.platform :as platform]
             [re-frame.core :as re-frame]
             [status-im.ui.components.react :as react]
-            [cljs-bean.core :as bean]))
+            [cljs-bean.core :as bean]
+            [status-im.ui.screens.chat.components.reply :as reply]))
 
 (def default-erc20-token
   {:symbol   :ERC20
@@ -31,16 +32,19 @@
                                          :userInfo   (bean/->js (merge user-info
                                                                        {:notificationType "local-notification"}))}))
 
-(defn local-push-android [{:keys [title message icon user-info channel-id]
+(defn local-push-android [{:keys [title message icon identicon user-info channel-id]
                            :or   {channel-id "status-im-notifications"}}]
-  (pn-android/present-local-notification (merge {:channelId channel-id
-                                                 :title     title
-                                                 :message   message
-                                                 :showBadge false}
-                                                (when user-info
-                                                  {:userInfo (bean/->js user-info)})
-                                                (when icon
-                                                  {:largeIconUrl (:uri (react/resolve-asset-source icon))}))))
+  (pn-android/present-local-notification
+   (merge {:channelId channel-id
+           :title     title
+           :message   message
+           :showBadge false}
+          (when user-info
+            {:userInfo (bean/->js user-info)})
+          (when identicon
+            {:smallIcon identicon})
+          (when icon
+            {:largeIconUrl (:uri (react/resolve-asset-source icon))}))))
 
 (defn handle-notification-press [{{deep-link :deepLink} :userInfo
                                   interaction           :userInteraction}]
@@ -61,9 +65,10 @@
                     (when (and data (.-dataJSON data))
                       (handle-notification-press (types/json->clj (.-dataJSON data))))))))
 
-(defn create-notification [{{:keys [state from to fromAccount toAccount value erc20 contract network]}
-                            :body
-                            :as notification}]
+(defn create-transfer-notification
+  [{{:keys [state from to fromAccount toAccount value erc20 contract network]}
+    :body
+    :as notification}]
   (let [chain       (ethereum/chain-id->chain-keyword network)
         token       (if erc20
                       (get-in tokens/all-tokens-normalized [(keyword chain)
@@ -94,6 +99,23 @@
      :icon      (get-in token [:icon :source])
      :user-info notification
      :message   description}))
+
+(defn create-message-notification
+  [{{:keys [message contact chat]} :body
+    :as notification}]
+  (let [type (get chat :chatType)]
+    {:title     (if (= type 1)
+                  @(re-frame/subscribe [:contacts/contact-name-by-identity (get contact :id)])
+                  (:name chat))
+     :identicon (get chat :identicon)
+     :user-info notification
+     :message   (reply/get-quoted-text-with-mentions (:parsedText message))}))
+
+(defn create-notification [{:keys [bodyType] :as notification}]
+  (case bodyType
+    "message" (create-message-notification notification)
+    "transaction" (create-transfer-notification notification)
+    nil))
 
 (re-frame/reg-fx
  ::local-push-ios
