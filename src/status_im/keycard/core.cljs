@@ -418,7 +418,7 @@
                                                 (assoc-in [:keycard :setup-step] next-step)
                                                 (assoc-in [:keycard :secrets :pairing] pairing)
                                                 (assoc-in [:keycard :secrets :paired-on] paired-on))}
-              (common/hide-connection-sheet)
+              (when-not (= flow :recovery) (common/hide-connection-sheet))
               (when multiaccount
                 (set-multiaccount-pairing multiaccount pairing paired-on))
               (when (= flow :login)
