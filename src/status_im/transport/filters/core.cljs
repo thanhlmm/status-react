@@ -119,7 +119,8 @@
 (fx/defn add-filter-to-db
   "Set the filter in the db and upsert a mailserver topic"
   [{:keys [db] :as cofx} filter]
-  (when-not (loaded? db filter)
+  (when (and (not (loaded? db filter))
+             (:listen? filter))
     (fx/merge cofx
               (set-raw-filter filter)
               (upsert-mailserver-topic filter))))
@@ -198,12 +199,14 @@
                                   discovery
                                   filterId
                                   chatId
+                                  listen
                                   topic
                                   identity]}]
   {:chat-id (if (not= identity "") (str "0x" identity) chatId)
    :id chatId
    :filter-id filterId
    :negotiated? negotiated
+   :listen? listen
    :discovery? discovery
    :topic topic})
 
