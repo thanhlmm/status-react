@@ -5888,7 +5888,7 @@ react-native-splash-screen@^3.2.0:
 
 "react-native-status-keycard@git+https://github.com/status-im/react-native-status-keycard.git#feature/ios":
   version "2.5.27"
-  resolved "git+https://github.com/status-im/react-native-status-keycard.git#b65839bfb831c3b885f43cf4947ad58fff5bf35e"
+  resolved "git+https://github.com/status-im/react-native-status-keycard.git#c867f6d40d6ec1435196160b7cf9e6b975a11c2a"
 
 react-native-svg@^9.8.4:
   version "9.13.6"
