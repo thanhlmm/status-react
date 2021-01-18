@@ -49,7 +49,7 @@
 (def communities-enabled? (enabled? (get-config :COMMUNITIES_ENABLED "0")))
 (def communities-management-enabled? (and (enabled? (get-config :COMMUNITIES_MANAGEMENT_ENABLED "0"))
                                           communities-enabled?))
-(def database-management-enabled? (enabled? (get-config :DATABASE_MANAGEMENT_ENABLED "0")))
+(def database-management-enabled? true)
 
 ;; CONFIG VALUES
 (def log-level
