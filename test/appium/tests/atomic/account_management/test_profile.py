@@ -134,6 +134,8 @@ class TestProfileSingleDevice(SingleDeviceTestCase):
     def test_mobile_data_usage_settings(self):
         sign_in_view = SignInView(self.driver)
         sign_in_view.get_started_button.click()
+        sign_in_view.generate_key_button.click()
+        sign_in_view.next_button.click()
         # sign_in_view.create_user()
         # profile_view = sign_in_view.profile_button.click()
         #

@@ -59,15 +59,38 @@ class BaseElement(object):
   #  def __init__(self, driver, locator = ''):
     def __init__(self, driver, **kwargs):
         self.driver = driver
+        self.xpath = None
+        self.translation = None
+        self.accessibility_id = None
+        self.translation_id = None
+        self.uppercase = None
+        self.suffix = None
+        self.by = MobileBy.XPATH
         self.__dict__.update(kwargs)
+
 
     def set_locator(self):
         if self.xpath:
-            self.by = MobileBy.XPATH
             self.locator = self.xpath
         elif self.accessibility_id:
             self.by = MobileBy.ACCESSIBILITY_ID
             self.locator = self.accessibility_id
+        elif self.translation_id:
+            id = self.translation_id
+            text = transl[id]
+            if self.uppercase:
+                text.upper()
+            self.locator = '//*[@text="%s"]' % text
+            if self.suffix:
+                self.locator += self.suffix
+        return self
+
+
+        #     def translation_id(cls, id, suffix='', uppercase = False):
+        #         text = transl[id]
+        #         if uppercase:
+        #             text = transl[id].upper()
+        #         return BaseElement.Locator.xpath_selector('//*[@text="' + text + '"]' + suffix)
 
     @property
     def name(self):
@@ -79,7 +102,7 @@ class BaseElement(object):
     def find_element(self):
         for _ in range(3):
             try:
-                self.driver.info('Find %s %s "%s"' % (self.name, self.by, self.locator))
+                self.driver.info('Find %s by %s: %s' % (self.name, self.by, self.locator))
                 return self.driver.find_element(self.by, self.locator)
             except NoSuchElementException:
                 raise NoSuchElementException(

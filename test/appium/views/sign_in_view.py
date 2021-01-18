@@ -135,10 +135,13 @@ from views.base_view import BaseView
 #         self.locator = self.Locator.accessibility_id("your-keys-more-icon")
 #
 #
-# class GenerateKeyButton(BaseButton):
-#     def __init__(self, driver):
-#         super(GenerateKeyButton, self).__init__(driver)
-#         self.locator = self.Locator.xpath_selector("//*[@text='Generate keys']")
+class GenerateKeyButton(BaseButton):
+
+    def __init__(self, driver):
+        super(GenerateKeyButton, self).__init__(driver)
+        self.locator = "//*[@text='Generate keys']"
+
+
 #
 #
 # class GenerateNewKeyButton(BaseButton):
@@ -235,7 +238,7 @@ class SignInView(BaseView):
         # self.create_multiaccount_button = CreateMultiaccountButton(self.driver)
         # self.i_have_multiaccount_button = IHaveMultiaccountButton(self.driver)
         # self.access_key_button = AccessKeyButton(self.driver)
-        # self.generate_key_button = GenerateKeyButton(self.driver)
+        self.generate_key_button = GenerateKeyButton(self.driver)
         # self.your_keys_more_icon = YourKeysMoreIcon(self.driver)
         # self.generate_new_key_button = GenerateNewKeyButton(self.driver)
         # self.add_existing_multiaccount_button = AddExistingMultiaccountButton(self.driver)

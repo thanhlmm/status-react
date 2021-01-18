@@ -412,7 +412,7 @@ class BaseView(object):
         # self.deny_button = DenyButton(self.driver)
         # self.continue_button = ContinueButton(self.driver)
         # self.ok_button = OkButton(self.driver)
-        # self.next_button = NextButton(self.driver)
+        self.next_button = BaseButton(self.driver, translation_id = 'next')
         # self.add_button = AddButton(self.driver)
         # self.save_button = SaveButton(self.driver)
         # self.done_button = DoneButton(self.driver)
