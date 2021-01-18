@@ -17,433 +17,434 @@ from tests import common_password, pytest_config_global, geth_log_emulator_path,
 from views.base_element import BaseButton, BaseElement, BaseEditBox, BaseText
 
 
-class BackButton(BaseButton):
-    def __init__(self, driver):
-        super(BackButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('back-button')
-
-    def click(self, times_to_click: int = 1):
-        for _ in range(times_to_click):
-            self.find_element().click()
-            self.driver.info('Tap on %s' % self.name)
-        return self.navigate()
-
-
-class AllowButton(BaseButton):
-    def __init__(self, driver):
-        super(AllowButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='Allow' or @text='ALLOW']")
-
-    def click(self, times_to_click=3):
-        try:
-            for _ in range(times_to_click):
-                self.find_element().click()
-                self.driver.info('Tap on %s' % self.name)
-        except NoSuchElementException:
-            pass
-
-
-class SearchEditBox(BaseEditBox):
-    def __init__(self, driver):
-        super(SearchEditBox, self).__init__(driver)
-        self.locator = self.Locator.text_selector("Search or type web address")
-
-
-class DenyButton(BaseButton):
-    def __init__(self, driver):
-        super(DenyButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='Deny' or @text='DENY']")
-
-class CancelButton(BaseButton):
-    def __init__(self, driver):
-        super(CancelButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='Cancel' or @text='CANCEL']")
-
-class DeleteButton(BaseButton):
-    def __init__(self, driver):
-        super(DeleteButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='DELETE']")
-
-
-class YesButton(BaseButton):
-    def __init__(self, driver):
-        super(YesButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='YES' or @text='GOT IT']")
-
-
-class NoButton(BaseButton):
-    def __init__(self, driver):
-        super(NoButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='No']")
-
-
-class OkButton(BaseButton):
-    def __init__(self, driver):
-        super(OkButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='OK'or @text='Ok']")
-
-
-class ContinueButton(BaseButton):
-    def __init__(self, driver):
-        super(ContinueButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='CONTINUE' or @text='Continue']")
-
-
-class TabButton(BaseButton):
-
-    @property
-    def counter(self):
-        class Counter(BaseText):
-            def __init__(self, driver, parent_locator):
-                super(Counter, self).__init__(driver)
-                self.locator = self.Locator.xpath_selector(
-                    "//*[@content-desc='%s']//android.view.ViewGroup[2]/android.widget.TextView" % parent_locator)
-
-        return Counter(self.driver, self.locator.value)
-
-    @property
-    def public_unread_messages(self):
-        class PublicChatUnreadMessages(BaseElement):
-            def __init__(self, driver):
-                super(PublicChatUnreadMessages, self).__init__(driver)
-                self.locator = self.Locator.accessibility_id('public-unread-badge')
-
-        return PublicChatUnreadMessages(self.driver)
-
-
-class HomeButton(TabButton):
-    def __init__(self, driver):
-        super(HomeButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('home-tab-button')
-
-    def navigate(self):
-        from views.home_view import HomeView
-        return HomeView(self.driver)
-
-    def click(self, desired_view='home'):
-        from views.home_view import PlusButton
-        from views.chat_view import ChatMessageInput, ProfileNicknameOtherUser
-        if desired_view == 'home':
-            element = PlusButton(self.driver)
-        elif desired_view == 'chat':
-            element = ChatMessageInput(self.driver)
-        elif desired_view == 'other_user_profile':
-            element = ProfileNicknameOtherUser(self.driver)
-        self.click_until_presence_of_element(element)
-        return self.navigate()
-
-
-class ShareButton(BaseButton):
-    def __init__(self, driver):
-        super(ShareButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('share-my-contact-code-button')
-
-
-class DappTabButton(TabButton):
-    def __init__(self, driver):
-        super(DappTabButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('dapp-tab-button')
-
-    def navigate(self):
-        from views.dapps_view import DappsView
-        return DappsView(self.driver)
-
-    def click(self, desired_element_text = 'enter_url'):
-        from views.dapps_view import EnterUrlEditbox
-        if desired_element_text == 'enter_url':
-            self.click_until_presence_of_element(EnterUrlEditbox(self.driver))
-        else:
-            base_view = BaseView(self.driver)
-            self.click_until_presence_of_element(base_view.element_by_text_part(desired_element_text))
-
-        return self.navigate()
-
-
-class WalletButton(TabButton):
-    def __init__(self, driver):
-        super(WalletButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('wallet-tab-button')
-
-    def navigate(self):
-        from views.wallet_view import WalletView
-        return WalletView(self.driver)
-
-    def click(self):
-        self.driver.info('Tap on %s' % self.name)
-        from views.wallet_view import MultiaccountMoreOptions
-        self.click_until_presence_of_element(MultiaccountMoreOptions(self.driver))
-        return self.navigate()
-
-
-class ProfileButton(TabButton):
-    def __init__(self, driver):
-        super(ProfileButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('profile-tab-button')
-
-    def navigate(self):
-        from views.profile_view import ProfileView
-        return ProfileView(self.driver)
-
-    def click(self, desired_element_text = 'privacy'):
-        from views.profile_view import PrivacyAndSecurityButton
-        if desired_element_text == 'privacy':
-            self.click_until_presence_of_element(PrivacyAndSecurityButton(self.driver))
-        else:
-            base_view = BaseView(self.driver)
-            self.click_until_presence_of_element(base_view.element_by_text_part(desired_element_text))
-        return self.navigate()
-
-class StatusButton(TabButton):
-    def __init__(self, driver):
-        super(StatusButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('status-tab-button')
-
-    def navigate(self):
-        from views.chat_view import ChatView
-        return ChatView(self.driver)
-
-    def click(self):
-        self.driver.info('Tap on %s' % self.name)
-        from views.chat_view import AddNewStatusButton
-        self.click_until_presence_of_element(AddNewStatusButton(self.driver))
-        return self.navigate()
-
-class SaveButton(BaseButton):
-    def __init__(self, driver):
-        super(SaveButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector(
-            "//android.widget.TextView[@text='Save']")
-
-
-class NextButton(BaseButton):
-    def __init__(self, driver):
-        super(NextButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector(
-            "//android.widget.TextView[@text='Next']")
-
-
-class AddButton(BaseButton):
-    def __init__(self, driver):
-        super(AddButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector(
-            "//android.widget.TextView[@text='Add']")
-
-
-class DoneButton(BaseButton):
-    def __init__(self, driver):
-        super(DoneButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@content-desc='done-button' or contains(@text, 'Done')]")
-
-
-class AppsButton(BaseButton):
-    def __init__(self, driver):
-        super(AppsButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id("Apps")
-
-
-class StatusAppIcon(BaseButton):
-    def __init__(self, driver):
-        super(StatusAppIcon, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector(
-            "//*[@text='Status']")
-
-
-class SendMessageButton(BaseButton):
-    def __init__(self, driver):
-        super(SendMessageButton, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id("send-message-button")
-
-    def click(self):
-        self.find_element().click()
-        self.driver.info('Tap on %s' % self.name)
-
-
-class ConnectionStatusText(BaseText):
-    def __init__(self, driver):
-        super(ConnectionStatusText, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector(
-            "//*[@content-desc='connection-status-text']/android.widget.TextView")
-
-
-class OkContinueButton(BaseButton):
-
-    def __init__(self, driver):
-        super(OkContinueButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='OK, CONTINUE']")
-
-
-class DiscardButton(BaseButton):
-
-    def __init__(self, driver):
-        super(DiscardButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='DISCARD']")
-
-
-class ConfirmButton(BaseButton):
-    def __init__(self, driver):
-        super(ConfirmButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='CONFIRM' or @text='Confirm']")
-
-
-class ProgressBar(BaseElement):
-    def __init__(self, driver, parent_locator: str = ''):
-        super(ProgressBar, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector(parent_locator + '//android.widget.ProgressBar')
-
-
-class CrossIcon(BaseButton):
-    def __init__(self, driver):
-        super(CrossIcon, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector('(//android.view.ViewGroup[@content-desc="icon"])[1]')
-
-
-class NativeCloseButton(BaseButton):
-    def __init__(self, driver):
-        super(NativeCloseButton, self).__init__(driver)
-        self.locator = self.Locator.id('android:id/aerr_close')
-
-
-class CrossIconInWelcomeScreen(BaseButton):
-    def __init__(self, driver):
-        super(CrossIconInWelcomeScreen, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('hide-home-button')
-
-
-class ShowRoots(BaseButton):
-
-    def __init__(self, driver):
-        super(ShowRoots, self).__init__(driver)
-        self.locator = self.Locator.accessibility_id('Show roots')
-
-
-class GetStartedButton(BaseButton):
-
-    def __init__(self, driver):
-        super(GetStartedButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='Get started']")
-
-
-class AssetButton(BaseButton):
-    def __init__(self, driver, asset_name):
-        super(AssetButton, self).__init__(driver)
-        self.asset_name = asset_name
-        self.locator = self.Locator.xpath_selector('(//*[@content-desc=":' + self.asset_name + '-asset-value"])[1]')
-
-    @property
-    def name(self):
-        return self.asset_name + self.__class__.__name__
-
-    def click(self):
-        self.wait_for_element().click()
-        self.driver.info('Tap on %s' % self.name)
-
-
-class OpenInStatusButton(BaseButton):
-    def __init__(self, driver):
-        super(OpenInStatusButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector('//*[@text="Open in Status"]')
-
-    def click(self):
-        self.wait_for_visibility_of_element()
-        # using sleep is wrong, but implicit wait for element can't help in particular case
-        time.sleep(3)
-        self.swipe_to_web_element()
-        self.wait_for_element().click()
-
-class StatusInBackgroundButton(BaseButton):
-    def __init__(self, driver):
-        super(StatusInBackgroundButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector('//*[contains(@content-desc,"Status")]')
-
-
-class EnterQRcodeEditBox(BaseEditBox):
-    def __init__(self, driver):
-        super(EnterQRcodeEditBox, self).__init__(driver)
-        self.locator = self.Locator.text_selector('Message')
-
-    def scan_qr(self, value):
-        self.set_value(value)
-        OkButton(self.driver).click()
-
-
-class OkGotItButton(BaseButton):
-    def __init__(self, driver):
-        super(OkGotItButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@text='Okay, got it']")
-
-    def click(self):
-        self.wait_for_element().click()
-        self.wait_for_invisibility_of_element()
-
-
-class AirplaneModeButton(BaseButton):
-    def __init__(self, driver):
-        super(AirplaneModeButton, self).__init__(driver)
-        self.locator = self.Locator.xpath_selector("//*[@content-desc='Airplane mode']")
-
-    def click(self):
-        self.driver.info('Turning on airplane mode')
-        action = TouchAction(self.driver)
-        action.press(None, 50, 0).move_to(None, 50, 300).perform()
-        super(AirplaneModeButton, self).click()
-        self.driver.press_keycode(4)
-
-
-class SearchInput(BaseEditBox):
-    def __init__(self, driver):
-        super().__init__(driver)
-        self.locator = self.Locator.accessibility_id('search-input')
+# class BackButton(BaseButton):
+#     def __init__(self, driver):
+#         super(BackButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('back-button')
+#
+#     def click(self, times_to_click: int = 1):
+#         for _ in range(times_to_click):
+#             self.find_element().click()
+#             self.driver.info('Tap on %s' % self.name)
+#         return self.navigate()
+#
+#
+# class AllowButton(BaseButton):
+#     def __init__(self, driver):
+#         super(AllowButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='Allow' or @text='ALLOW']")
+#
+#     def click(self, times_to_click=3):
+#         try:
+#             for _ in range(times_to_click):
+#                 self.find_element().click()
+#                 self.driver.info('Tap on %s' % self.name)
+#         except NoSuchElementException:
+#             pass
+#
+#
+# class SearchEditBox(BaseEditBox):
+#     def __init__(self, driver):
+#         super(SearchEditBox, self).__init__(driver)
+#         self.locator = self.Locator.text_selector("Search or type web address")
+#
+#
+# class DenyButton(BaseButton):
+#     def __init__(self, driver):
+#         super(DenyButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='Deny' or @text='DENY']")
+#
+# class CancelButton(BaseButton):
+#     def __init__(self, driver):
+#         super(CancelButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='Cancel' or @text='CANCEL']")
+#
+# class DeleteButton(BaseButton):
+#     def __init__(self, driver):
+#         super(DeleteButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='DELETE']")
+#
+#
+# class YesButton(BaseButton):
+#     def __init__(self, driver):
+#         super(YesButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='YES' or @text='GOT IT']")
+#
+#
+# class NoButton(BaseButton):
+#     def __init__(self, driver):
+#         super(NoButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='No']")
+#
+#
+# class OkButton(BaseButton):
+#     def __init__(self, driver):
+#         super(OkButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='OK'or @text='Ok']")
+#
+#
+# class ContinueButton(BaseButton):
+#     def __init__(self, driver):
+#         super(ContinueButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='CONTINUE' or @text='Continue']")
+#
+#
+# class TabButton(BaseButton):
+#
+#     @property
+#     def counter(self):
+#         class Counter(BaseText):
+#             def __init__(self, driver, parent_locator):
+#                 super(Counter, self).__init__(driver)
+#                 self.locator = self.Locator.xpath_selector(
+#                     "//*[@content-desc='%s']//android.view.ViewGroup[2]/android.widget.TextView" % parent_locator)
+#
+#         return Counter(self.driver, self.locator.value)
+#
+#     @property
+#     def public_unread_messages(self):
+#         class PublicChatUnreadMessages(BaseElement):
+#             def __init__(self, driver):
+#                 super(PublicChatUnreadMessages, self).__init__(driver)
+#                 self.locator = self.Locator.accessibility_id('public-unread-badge')
+#
+#         return PublicChatUnreadMessages(self.driver)
+#
+#
+# class HomeButton(TabButton):
+#     def __init__(self, driver):
+#         super(HomeButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('home-tab-button')
+#
+#     def navigate(self):
+#         from views.home_view import HomeView
+#         return HomeView(self.driver)
+#
+#     def click(self, desired_view='home'):
+#         from views.home_view import PlusButton
+#         from views.chat_view import ChatMessageInput, ProfileNicknameOtherUser
+#         if desired_view == 'home':
+#             element = PlusButton(self.driver)
+#         elif desired_view == 'chat':
+#             element = ChatMessageInput(self.driver)
+#         elif desired_view == 'other_user_profile':
+#             element = ProfileNicknameOtherUser(self.driver)
+#         self.click_until_presence_of_element(element)
+#         return self.navigate()
+#
+#
+# class ShareButton(BaseButton):
+#     def __init__(self, driver):
+#         super(ShareButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('share-my-contact-code-button')
+#
+#
+# class DappTabButton(TabButton):
+#     def __init__(self, driver):
+#         super(DappTabButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('dapp-tab-button')
+#
+#     def navigate(self):
+#         from views.dapps_view import DappsView
+#         return DappsView(self.driver)
+#
+#     def click(self, desired_element_text = 'enter_url'):
+#         from views.dapps_view import EnterUrlEditbox
+#         if desired_element_text == 'enter_url':
+#             self.click_until_presence_of_element(EnterUrlEditbox(self.driver))
+#         else:
+#             base_view = BaseView(self.driver)
+#             self.click_until_presence_of_element(base_view.element_by_text_part(desired_element_text))
+#
+#         return self.navigate()
+#
+#
+# class WalletButton(TabButton):
+#     def __init__(self, driver):
+#         super(WalletButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('wallet-tab-button')
+#
+#     def navigate(self):
+#         from views.wallet_view import WalletView
+#         return WalletView(self.driver)
+#
+#     def click(self):
+#         self.driver.info('Tap on %s' % self.name)
+#         from views.wallet_view import MultiaccountMoreOptions
+#         self.click_until_presence_of_element(MultiaccountMoreOptions(self.driver))
+#         return self.navigate()
+#
+#
+# class ProfileButton(TabButton):
+#     def __init__(self, driver):
+#         super(ProfileButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('profile-tab-button')
+#
+#     def navigate(self):
+#         from views.profile_view import ProfileView
+#         return ProfileView(self.driver)
+#
+#     def click(self, desired_element_text = 'privacy'):
+#         from views.profile_view import PrivacyAndSecurityButton
+#         if desired_element_text == 'privacy':
+#             self.click_until_presence_of_element(PrivacyAndSecurityButton(self.driver))
+#         else:
+#             base_view = BaseView(self.driver)
+#             self.click_until_presence_of_element(base_view.element_by_text_part(desired_element_text))
+#         return self.navigate()
+#
+# class StatusButton(TabButton):
+#     def __init__(self, driver):
+#         super(StatusButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('status-tab-button')
+#
+#     def navigate(self):
+#         from views.chat_view import ChatView
+#         return ChatView(self.driver)
+#
+#     def click(self):
+#         self.driver.info('Tap on %s' % self.name)
+#         from views.chat_view import AddNewStatusButton
+#         self.click_until_presence_of_element(AddNewStatusButton(self.driver))
+#         return self.navigate()
+#
+# class SaveButton(BaseButton):
+#     def __init__(self, driver):
+#         super(SaveButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector(
+#             "//android.widget.TextView[@text='Save']")
+#
+#
+# class NextButton(BaseButton):
+#     def __init__(self, driver):
+#         super(NextButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector(
+#             "//android.widget.TextView[@text='Next']")
+#
+#
+# class AddButton(BaseButton):
+#     def __init__(self, driver):
+#         super(AddButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector(
+#             "//android.widget.TextView[@text='Add']")
+#
+#
+# class DoneButton(BaseButton):
+#     def __init__(self, driver):
+#         super(DoneButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@content-desc='done-button' or contains(@text, 'Done')]")
+#
+#
+# class AppsButton(BaseButton):
+#     def __init__(self, driver):
+#         super(AppsButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id("Apps")
+#
+#
+# class StatusAppIcon(BaseButton):
+#     def __init__(self, driver):
+#         super(StatusAppIcon, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector(
+#             "//*[@text='Status']")
+#
+#
+# class SendMessageButton(BaseButton):
+#     def __init__(self, driver):
+#         super(SendMessageButton, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id("send-message-button")
+#
+#     def click(self):
+#         self.find_element().click()
+#         self.driver.info('Tap on %s' % self.name)
+#
+#
+# class ConnectionStatusText(BaseText):
+#     def __init__(self, driver):
+#         super(ConnectionStatusText, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector(
+#             "//*[@content-desc='connection-status-text']/android.widget.TextView")
+#
+#
+# class OkContinueButton(BaseButton):
+#
+#     def __init__(self, driver):
+#         super(OkContinueButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='OK, CONTINUE']")
+#
+#
+# class DiscardButton(BaseButton):
+#
+#     def __init__(self, driver):
+#         super(DiscardButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='DISCARD']")
+#
+#
+# class ConfirmButton(BaseButton):
+#     def __init__(self, driver):
+#         super(ConfirmButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='CONFIRM' or @text='Confirm']")
+#
+#
+# class ProgressBar(BaseElement):
+#     def __init__(self, driver, parent_locator: str = ''):
+#         super(ProgressBar, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector(parent_locator + '//android.widget.ProgressBar')
+#
+#
+# class CrossIcon(BaseButton):
+#     def __init__(self, driver):
+#         super(CrossIcon, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector('(//android.view.ViewGroup[@content-desc="icon"])[1]')
+#
+#
+# class NativeCloseButton(BaseButton):
+#     def __init__(self, driver):
+#         super(NativeCloseButton, self).__init__(driver)
+#         self.locator = self.Locator.id('android:id/aerr_close')
+#
+#
+# class CrossIconInWelcomeScreen(BaseButton):
+#     def __init__(self, driver):
+#         super(CrossIconInWelcomeScreen, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('hide-home-button')
+#
+#
+# class ShowRoots(BaseButton):
+#
+#     def __init__(self, driver):
+#         super(ShowRoots, self).__init__(driver)
+#         self.locator = self.Locator.accessibility_id('Show roots')
+#
+#
+# class GetStartedButton(BaseButton):
+#
+#     def __init__(self, driver):
+#         super(GetStartedButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='Get started']")
+#
+#
+# class AssetButton(BaseButton):
+#     def __init__(self, driver, asset_name):
+#         super(AssetButton, self).__init__(driver)
+#         self.asset_name = asset_name
+#         self.locator = self.Locator.xpath_selector('(//*[@content-desc=":' + self.asset_name + '-asset-value"])[1]')
+#
+#     @property
+#     def name(self):
+#         return self.asset_name + self.__class__.__name__
+#
+#     def click(self):
+#         self.wait_for_element().click()
+#         self.driver.info('Tap on %s' % self.name)
+#
+#
+# class OpenInStatusButton(BaseButton):
+#     def __init__(self, driver):
+#         super(OpenInStatusButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector('//*[@text="Open in Status"]')
+#
+#     def click(self):
+#         self.wait_for_visibility_of_element()
+#         # using sleep is wrong, but implicit wait for element can't help in particular case
+#         time.sleep(3)
+#         self.swipe_to_web_element()
+#         self.wait_for_element().click()
+#
+# class StatusInBackgroundButton(BaseButton):
+#     def __init__(self, driver):
+#         super(StatusInBackgroundButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector('//*[contains(@content-desc,"Status")]')
+#
+#
+# class EnterQRcodeEditBox(BaseEditBox):
+#     def __init__(self, driver):
+#         super(EnterQRcodeEditBox, self).__init__(driver)
+#         self.locator = self.Locator.text_selector('Message')
+#
+#     def scan_qr(self, value):
+#         self.set_value(value)
+#         OkButton(self.driver).click()
+#
+#
+# class OkGotItButton(BaseButton):
+#     def __init__(self, driver):
+#         super(OkGotItButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@text='Okay, got it']")
+#
+#     def click(self):
+#         self.wait_for_element().click()
+#         self.wait_for_invisibility_of_element()
+#
+#
+# class AirplaneModeButton(BaseButton):
+#     def __init__(self, driver):
+#         super(AirplaneModeButton, self).__init__(driver)
+#         self.locator = self.Locator.xpath_selector("//*[@content-desc='Airplane mode']")
+#
+#     def click(self):
+#         self.driver.info('Turning on airplane mode')
+#         action = TouchAction(self.driver)
+#         action.press(None, 50, 0).move_to(None, 50, 300).perform()
+#         super(AirplaneModeButton, self).click()
+#         self.driver.press_keycode(4)
+#
+#
+# class SearchInput(BaseEditBox):
+#     def __init__(self, driver):
+#         super().__init__(driver)
+#         self.locator = self.Locator.accessibility_id('search-input')
 
 
 class BaseView(object):
     def __init__(self, driver):
         self.driver = driver
-        self.send_message_button = SendMessageButton(self.driver)
-        self.home_button = HomeButton(self.driver)
-        self.wallet_button = WalletButton(self.driver)
-        self.profile_button = ProfileButton(self.driver)
-        self.dapp_tab_button = DappTabButton(self.driver)
-        self.status_button = StatusButton(self.driver)
-
-        self.yes_button = YesButton(self.driver)
-        self.no_button = NoButton(self.driver)
-        self.back_button = BackButton(self.driver)
-        self.allow_button = AllowButton(self.driver)
-        self.deny_button = DenyButton(self.driver)
-        self.continue_button = ContinueButton(self.driver)
-        self.ok_button = OkButton(self.driver)
-        self.next_button = NextButton(self.driver)
-        self.add_button = AddButton(self.driver)
-        self.save_button = SaveButton(self.driver)
-        self.done_button = DoneButton(self.driver)
-        self.delete_button = DeleteButton(self.driver)
-        self.ok_continue_button = OkContinueButton(self.driver)
-        self.discard_button = DiscardButton(self.driver)
-        self.confirm_button = ConfirmButton(self.driver)
-        self.connection_status = ConnectionStatusText(self.driver)
-        self.cross_icon = CrossIcon(self.driver)
-        self.native_close_button = NativeCloseButton(self.driver)
-        self.show_roots_button = ShowRoots(self.driver)
+        # self.send_message_button = SendMessageButton(self.driver)
+        # self.home_button = HomeButton(self.driver)
+        # self.wallet_button = WalletButton(self.driver)
+        # self.profile_button = ProfileButton(self.driver)
+        # self.dapp_tab_button = DappTabButton(self.driver)
+        # self.status_button = StatusButton(self.driver)
+        #
+        # self.yes_button = YesButton(self.driver)
+        # self.no_button = NoButton(self.driver)
+        # self.back_button = BackButton(self.driver)
+        # self.allow_button = AllowButton(self.driver)
+        # self.deny_button = DenyButton(self.driver)
+        # self.continue_button = ContinueButton(self.driver)
+        # self.ok_button = OkButton(self.driver)
+        # self.next_button = NextButton(self.driver)
+        # self.add_button = AddButton(self.driver)
+        # self.save_button = SaveButton(self.driver)
+        # self.done_button = DoneButton(self.driver)
+        # self.delete_button = DeleteButton(self.driver)
+        # self.ok_continue_button = OkContinueButton(self.driver)
+        # self.discard_button = DiscardButton(self.driver)
+        # self.confirm_button = ConfirmButton(self.driver)
+        # self.connection_status = ConnectionStatusText(self.driver)
+        # self.cross_icon = CrossIcon(self.driver)
+        # self.native_close_button = NativeCloseButton(self.driver)
+        # self.show_roots_button = ShowRoots(self.driver)
         #self.get_started_button = GetStartedButton(self.driver)
-        self.get_started_button = BaseButton(self.driver, 'xpath', '//*[@text="Get started"]')
+
+        self.get_started_button = BaseButton(self.driver, xpath = "//*[@text='Get started']")
             #BaseButton(self.driver).Locator.xpath_selector('//*[@text="Get started"]')
-        self.ok_got_it_button = OkGotItButton(self.driver)
-        self.progress_bar = ProgressBar(self.driver)
-        self.cross_icon_iside_welcome_screen_button = CrossIconInWelcomeScreen(self.driver)
-        self.status_in_background_button = StatusInBackgroundButton(self.driver)
-        self.cancel_button = CancelButton(self.driver)
-        self.search_input = SearchInput(self.driver)
-        self.share_button = ShareButton(self.driver)
-
-        # external browser
-        self.search_in_google_edit_box = SearchEditBox(self.driver)
-        self.open_in_status_button = OpenInStatusButton(self.driver)
-
-        self.apps_button = AppsButton(self.driver)
-        self.status_app_icon = StatusAppIcon(self.driver)
-
-        self.airplane_mode_button = AirplaneModeButton(self.driver)
-        self.enter_qr_edit_box = EnterQRcodeEditBox(self.driver)
+        # self.ok_got_it_button = OkGotItButton(self.driver)
+        # self.progress_bar = ProgressBar(self.driver)
+        # self.cross_icon_iside_welcome_screen_button = CrossIconInWelcomeScreen(self.driver)
+        # self.status_in_background_button = StatusInBackgroundButton(self.driver)
+        # self.cancel_button = CancelButton(self.driver)
+        # self.search_input = SearchInput(self.driver)
+        # self.share_button = ShareButton(self.driver)
+        #
+        # # external browser
+        # self.search_in_google_edit_box = SearchEditBox(self.driver)
+        # self.open_in_status_button = OpenInStatusButton(self.driver)
+        #
+        # self.apps_button = AppsButton(self.driver)
+        # self.status_app_icon = StatusAppIcon(self.driver)
+        #
+        # self.airplane_mode_button = AirplaneModeButton(self.driver)
+        # self.enter_qr_edit_box = EnterQRcodeEditBox(self.driver)
 
         self.element_types = {
             'base': BaseElement,
