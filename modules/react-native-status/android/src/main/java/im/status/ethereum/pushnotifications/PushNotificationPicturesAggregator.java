@@ -22,11 +22,12 @@ import static im.status.ethereum.pushnotifications.PushNotification.LOG_TAG;
 
 public class PushNotificationPicturesAggregator {
   interface Callback {
-    public void call(Bitmap largeIconImage, Bitmap bigPictureImage);
+    public void call(Bitmap largeIconImage, Bitmap bigPictureImage, Bitmap identiconImage);
   }
 
   private AtomicInteger count = new AtomicInteger(0);
 
+  private Bitmap identiconImage;
   private Bitmap largeIconImage;
   private Bitmap bigPictureImage;
 
@@ -68,6 +69,42 @@ public class PushNotificationPicturesAggregator {
       @Override
       public void onFailureImpl(DataSource dataSource) {
         aggregator.setBigPicture(null);
+      }
+    });
+  }
+
+  public void setIdenticon(Bitmap bitmap) {
+    this.identiconImage = bitmap;
+    this.finished();
+  }
+
+  public void setIdenticonUrl(Context context, String url) {
+    if(null == url) {
+      this.setIdenticon(null);
+      return;
+    }
+
+    Uri uri = null;
+
+    try {
+      uri = Uri.parse(url);
+    } catch(Exception ex) {
+      Log.e(LOG_TAG, "Failed to parse identiconUrl", ex);
+      this.setIdenticon(null);
+      return;
+    }
+
+    final PushNotificationPicturesAggregator aggregator = this;
+
+    this.downloadRequest(context, uri, new BaseBitmapDataSubscriber() {
+      @Override
+      public void onNewResultImpl(@Nullable Bitmap bitmap) {
+          aggregator.setIdenticon(bitmap);
+      }
+
+      @Override
+      public void onFailureImpl(DataSource dataSource) {
+          aggregator.setIdenticon(null);
       }
     });
   }
@@ -128,8 +165,8 @@ public class PushNotificationPicturesAggregator {
     synchronized(this.count) {
       int val = this.count.incrementAndGet();
 
-      if(val >= 2 && this.callback != null) {
-        this.callback.call(this.largeIconImage, this.bigPictureImage);
+      if(val >= 3 && this.callback != null) {
+        this.callback.call(this.largeIconImage, this.bigPictureImage, this.identiconImage);
       }
     }
   }

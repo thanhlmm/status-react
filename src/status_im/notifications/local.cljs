@@ -32,17 +32,20 @@
                                          :userInfo   (bean/->js (merge user-info
                                                                        {:notificationType "local-notification"}))}))
 
-(defn local-push-android [{:keys [title message icon identicon user-info channel-id]
-                           :or   {channel-id "status-im-notifications"}}]
+(defn local-push-android
+  [{:keys [title message icon identicon user-info channel-id timestamp]
+    :or   {channel-id "status-im-notifications"}}]
   (pn-android/present-local-notification
    (merge {:channelId channel-id
            :title     title
            :message   message
            :showBadge false}
+          (when timestamp
+            {:when timestamp})
           (when user-info
             {:userInfo (bean/->js user-info)})
           (when identicon
-            {:smallIcon identicon})
+            {:identiconUrl identicon})
           (when icon
             {:largeIconUrl (:uri (react/resolve-asset-source icon))}))))
 
@@ -109,6 +112,7 @@
                   (:name chat))
      :identicon (get chat :identicon)
      :user-info notification
+     :timestamp (get message :timestamp)
      :message   (reply/get-quoted-text-with-mentions (:parsedText message))}))
 
 (defn create-notification [{:keys [bodyType] :as notification}]

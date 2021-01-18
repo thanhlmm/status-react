@@ -27,6 +27,9 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.Person;
+import androidx.core.app.Person.Builder;
+import androidx.core.graphics.drawable.IconCompat;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
@@ -86,16 +89,17 @@ public class PushNotificationHelper {
 
     public void sendToNotificationCentre(final Bundle bundle) {
         PushNotificationPicturesAggregator aggregator = new PushNotificationPicturesAggregator(new PushNotificationPicturesAggregator.Callback() {
-                public void call(Bitmap largeIconImage, Bitmap bigPictureImage) {
-                    sendToNotificationCentreWithPicture(bundle, largeIconImage, bigPictureImage);
+                public void call(Bitmap largeIconImage, Bitmap bigPictureImage, Bitmap identiconImage) {
+                    sendToNotificationCentreWithPicture(bundle, largeIconImage, bigPictureImage, identiconImage);
                 }
             });
 
         aggregator.setLargeIconUrl(context, bundle.getString("largeIconUrl"));
+        aggregator.setIdenticonUrl(context, bundle.getString("identiconUrl"));
         aggregator.setBigPictureUrl(context, bundle.getString("bigPictureUrl"));
     }
 
-    public void sendToNotificationCentreWithPicture(final Bundle bundle, Bitmap largeIconBitmap, Bitmap bigPictureBitmap) {
+    public void sendToNotificationCentreWithPicture(final Bundle bundle, Bitmap largeIconBitmap, Bitmap bigPictureBitmap, Bitmap identiconBitmap) {
         try {
             Class intentClass = getMainActivityClass();
             if (intentClass == null) {
@@ -240,11 +244,15 @@ public class PushNotificationHelper {
 
                 String largeIcon = bundle.getString("largeIcon");
 
+                Log.d(LOG_TAG, "largeIconBitmap: " + largeIcon);
+
                 if (largeIcon != null && !largeIcon.isEmpty()) {
                   largeIconResId = res.getIdentifier(largeIcon, "mipmap", packageName);
                 } else if(largeIcon == null) {
                   largeIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
                 }
+
+                Log.d(LOG_TAG, "largeIconResId: " + largeIconResId);
 
                 // Before Lolipop there was no large icon for notifications.
                 if (largeIconResId != 0 && (largeIcon != null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
@@ -274,11 +282,27 @@ public class PushNotificationHelper {
 
             NotificationCompat.Style style;
 
+            Log.d(LOG_TAG, "identicon: " + bundle.getString("identiconUrl"));
             if(bigPictureBitmap != null) {
               style = new NotificationCompat.BigPictureStyle()
                       .bigPicture(bigPictureBitmap)
                       .setBigContentTitle(title)
                       .setSummaryText(message);
+            } else if (bundle.getString("identiconUrl") != null) {
+                NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("Me");
+
+                Person person = new Person
+                    .Builder()
+                    .setIcon(IconCompat.createWithBitmap(identiconBitmap))
+                    .setName(title)
+                    .build();
+
+                long timestamp = (long) bundle.getLong("when");
+                messagingStyle.addMessage(message,
+                                          timestamp,
+                                          person);
+
+                style = messagingStyle;
             } else {
               style = new NotificationCompat.BigTextStyle().bigText(bigText);
             }
