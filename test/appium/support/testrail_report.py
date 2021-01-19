@@ -8,6 +8,7 @@ from os import environ
 from support.base_test_report import BaseTestReport
 from sys import argv
 
+
 class TestrailReport(BaseTestReport):
 
     def __init__(self):
@@ -121,6 +122,7 @@ class TestrailReport(BaseTestReport):
         tests = self.get_all_tests()
         passed_tests = self.get_passed_tests()
         failed_tests = self.get_failed_tests()
+        final_description = "Nothing to say at this time..."
         if len(tests) > 0:
             description_title = "# %.0f%% of end-end tests have passed\n" % (len(passed_tests) / len(tests) * 100)
             description_title += "\n"
@@ -129,7 +131,7 @@ class TestrailReport(BaseTestReport):
             description_title += "Passed tests: %d\n" % len(passed_tests)
             description_title += "\n"
             ids_failed_test = []
-            description = ''
+            description, case_info = '', ''
             if failed_tests:
                 for i, test in enumerate(failed_tests):
                     last_testrun = test.testruns[-1]
@@ -151,7 +153,6 @@ class TestrailReport(BaseTestReport):
 
         request_body = {'description': final_description}
         return self.post('update_run/%s' % self.run_id, request_body)
-
 
     def get_run_results(self):
         return self.get('get_results_for_run/%s' % self.run_id)
